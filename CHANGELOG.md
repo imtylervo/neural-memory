@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Quality scorer: `error` memories without a root cause or a fix, and
+  `decision` memories without a reason, now get a template hint. Hints only;
+  scores and write-gate decisions are unchanged.
+
 ## [4.62.0] — 2026-08-16
 
 ### Breaking

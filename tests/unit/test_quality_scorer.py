@@ -156,3 +156,68 @@ class TestQualityResult:
         result = QualityResult(score=5, quality="medium")
         with pytest.raises(AttributeError):
             result.score = 10  # type: ignore[misc]
+
+
+class TestTypeSpecificHints:
+    """Encoding template hints for error and decision memories."""
+
+    @staticmethod
+    def _has(result: QualityResult, word: str) -> bool:
+        return any(word in h for h in result.hints)
+
+    def test_error_without_cause_or_fix(self) -> None:
+        r = score_memory("Login endpoint returns 500", memory_type="error")
+        assert self._has(r, "root cause")
+        assert self._has(r, "the fix")
+
+    def test_error_with_cause_only(self) -> None:
+        r = score_memory("Login returns 500 because the token was null", memory_type="error")
+        assert not self._has(r, "root cause")
+        assert self._has(r, "the fix")
+
+    def test_error_with_fix_only(self) -> None:
+        r = score_memory("Login returns 500, fixed by adding a null check", memory_type="error")
+        assert self._has(r, "root cause")
+        assert not self._has(r, "the fix")
+
+    def test_error_with_cause_and_fix(self) -> None:
+        r = score_memory(
+            "Login failed because token was null, fixed by a null check", memory_type="error"
+        )
+        assert not self._has(r, "root cause")
+        assert not self._has(r, "the fix")
+
+    def test_error_with_root_cause_phrase(self) -> None:
+        r = score_memory("Root cause: stale cache entry. Workaround: restart", memory_type="error")
+        assert not self._has(r, "root cause")
+        assert not self._has(r, "the fix")
+
+    def test_decision_why_hint(self) -> None:
+        without = score_memory("Use Postgres over SQLite for sync", memory_type="decision")
+        with_why = score_memory(
+            "Use Postgres over SQLite for sync because of concurrent writers",
+            memory_type="decision",
+        )
+        assert self._has(without, "state why")
+        assert not self._has(with_why, "state why")
+
+    @pytest.mark.parametrize("memory_type", ["fact", "insight", None])
+    def test_other_types_get_no_template_hints(self, memory_type: str | None) -> None:
+        r = score_memory("Login endpoint returns 500", memory_type=memory_type)
+        assert not self._has(r, "Error memory")
+        assert not self._has(r, "Decision memory")
+
+    def test_score_unchanged_by_template_hints(self) -> None:
+        err = score_memory("Login endpoint returns 500 on empty password", memory_type="error")
+        fact = score_memory("Login endpoint returns 500 on empty password", memory_type="insight")
+        assert (err.score, err.quality) == (fact.score, fact.quality) == (3, "low")
+
+    def test_high_quality_error_has_no_hints(self) -> None:
+        r = score_memory(
+            "Auth failed after deploy v2.1 because token was null, fixed by null check in auth.py",
+            memory_type="error",
+            tags=["auth"],
+            context={"cause": "null token"},
+        )
+        assert r.score >= 7
+        assert r.hints == ()
