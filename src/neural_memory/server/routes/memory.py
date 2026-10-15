@@ -573,7 +573,10 @@ async def create_neuron(
         created_at=request.created_at or utcnow(),
     )
 
-    neuron_id = await storage.add_neuron(neuron)
+    try:
+        neuron_id = await storage.add_neuron(neuron)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     return NeuronResponse(
         id=neuron_id,

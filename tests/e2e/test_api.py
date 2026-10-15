@@ -271,6 +271,19 @@ class TestNeuronCRUD:
         assert data["content"] == "Test concept"
         assert "id" in data
 
+    def test_create_neuron_duplicate_id_returns_400(
+        self, client: TestClient, brain_id: str
+    ) -> None:
+        """Re-using an existing neuron ID is a client error, not a 500."""
+        headers = {"X-Brain-ID": brain_id}
+        body = {"type": "concept", "content": "Test concept"}
+        neuron_id = client.post("/memory/neurons", json=body, headers=headers).json()["id"]
+
+        response = client.post("/memory/neurons", json={**body, "id": neuron_id}, headers=headers)
+
+        assert response.status_code == 400
+        assert "already exists" in response.json()["detail"]
+
     def test_get_neuron(self, client: TestClient, brain_id: str) -> None:
         """Test getting a neuron by ID."""
         create_resp = client.post(
