@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`POST /brain/{id}/merge` 500 on malformed snapshot**: a snapshot entry
+  missing a required key (for example a synapse without `source_id`) now
+  returns 400 instead of an unhandled `KeyError`.
+
 ## [4.62.0] — 2026-08-16
 
 ### Breaking

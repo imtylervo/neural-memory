@@ -520,6 +520,32 @@ class TestExportImport:
         data = import_response.json()
         assert data["neuron_count"] > 0
 
+    def test_merge_malformed_synapse_returns_400(self, client: TestClient) -> None:
+        """A snapshot synapse without source_id is a client error, not a 500."""
+        brain_id = client.post("/brain/create", json={"name": "merge_target"}).json()["id"]
+        client.post(
+            "/memory/encode",
+            json={"content": "Memory that must survive a bad merge"},
+            headers={"X-Brain-ID": brain_id},
+        )
+        before = client.get(f"/brain/{brain_id}/stats").json()["neuron_count"]
+
+        response = client.post(
+            f"/brain/{brain_id}/merge",
+            json={
+                "snapshot": {
+                    "brain_id": "incoming",
+                    "brain_name": "incoming",
+                    "exported_at": "2026-01-01T00:00:00",
+                    "version": "1",
+                    "synapses": [{"id": "s1"}],
+                }
+            },
+        )
+
+        assert response.status_code == 400
+        assert client.get(f"/brain/{brain_id}/stats").json()["neuron_count"] == before
+
 
 class TestFTS5DiacriticsRemoval:
     """FTS5 remove_diacritics=2 — Vietnamese text matches queries without dấu."""
