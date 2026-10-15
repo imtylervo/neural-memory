@@ -196,6 +196,10 @@ class TestVietnameseMarkers:
                 "Dùng Redis Memcached cho cache users",
             ),
             (
+                "Dùng Redis thay\nvì Memcached cho cache users",
+                "Dùng Redis Memcached cho cache users",
+            ),
+            (
                 "Redis ổn định so với Memcached cho cache users",
                 "Redis ổn định Memcached cho cache users",
             ),

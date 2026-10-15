@@ -21,7 +21,7 @@ _CAUSAL_PATTERN = re.compile(
     r"\b(because|caused|due to|led to|resulted in|reason|since|therefore"
     r"|so that|in order to|as a result|consequently"
     # Vietnamese; "vì" also covers "bởi vì" / "vì vậy", but not "thay vì" (comparative)
-    r"|(?<!thay )vì|do\s+đó|dẫn\s+đến)\b",
+    r"|(?<!thay\s)vì|do\s+đó|dẫn\s+đến)\b",
     re.IGNORECASE,
 )
 

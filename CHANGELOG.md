@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
+### Added
 
 - **Quality scorer for Vietnamese**: common Vietnamese causal (`vì`, `do đó`,
   `dẫn đến`), temporal (`sau khi`, `trước khi`) and comparative (`thay vì`,
