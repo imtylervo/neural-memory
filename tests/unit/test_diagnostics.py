@@ -692,6 +692,7 @@ async def _hub_store(
     in_degree: int = 0,
     hub_meta: bool = False,
     temporal_meta: bool = False,
+    felt_type: bool = False,
     hubs: int = 1,
 ) -> InMemoryStorage:
     """Brain where neurons 'hub-0..' each have out_degree + in_degree synapses."""
@@ -719,7 +720,7 @@ async def _hub_store(
                 Synapse.create(
                     source_id=hub_id if outgoing else leaf_id,
                     target_id=leaf_id if outgoing else hub_id,
-                    type=SynapseType.RELATED_TO,
+                    type=SynapseType.FELT if felt_type else SynapseType.RELATED_TO,
                     metadata=(
                         {"_hub": True}
                         if hub_meta
@@ -794,6 +795,11 @@ class TestHubNeurons:
         assert _hub_warnings(report) == []
 
     @pytest.mark.asyncio
+    async def test_felt_synapses_not_counted(self) -> None:
+        report = await _analyze(await _hub_store(out_degree=30, felt_type=True))
+        assert _hub_warnings(report) == []
+
+    @pytest.mark.asyncio
     async def test_encoder_built_brain_has_no_hub_warning(self) -> None:
         store = InMemoryStorage()
         brain = Brain.create(name="enc", config=BrainConfig(), owner_id="test")
@@ -801,9 +807,14 @@ class TestHubNeurons:
         store.set_brain(brain.id)
         encoder = MemoryEncoder(store, brain.config)
         start = datetime(2026, 1, 1, 8, 0)
-        for i in range(30):
+        for i in range(50):
+            text = (
+                f"We fixed a bug in module{i} together with the team"
+                if i % 2
+                else f"Annoying: the module{i} build failed again and wasted an hour"
+            )
             await encoder.encode(
-                f"We fixed bug number {i} in the FastAPI service together",
+                text,
                 timestamp=start + timedelta(hours=i // 3),
                 skip_conflicts=True,
             )
