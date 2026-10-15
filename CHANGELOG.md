@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Dashboard `/visualize`**: a non-integer `limit` in the request body (`"abc"`,
+- **Dashboard `/visualize`**: a non-integer or overflowing `limit` in the request body (`"abc"`,
   `null`, a list) now returns 400 instead of an unhandled 500.
 
 ## [4.62.0] — 2026-08-16

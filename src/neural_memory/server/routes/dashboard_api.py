@@ -1529,7 +1529,7 @@ async def visualize_memory(
     output_format = str(body.get("format", "vega_lite"))
     try:
         limit = min(int(body.get("limit", 20)), 50)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         raise HTTPException(status_code=400, detail="limit must be an integer") from None
 
     try:

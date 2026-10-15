@@ -266,6 +266,15 @@ class TestVisualizeEndpoint:
         resp = client.post("/api/dashboard/visualize", json={"query": "x", "limit": bad_limit})
         assert resp.status_code == 400
 
+    def test_overflowing_limit_returns_400(self, client: TestClient) -> None:
+        # 1e400 is valid JSON; json.loads gives inf and int(inf) raises OverflowError
+        resp = client.post(
+            "/api/dashboard/visualize",
+            content='{"query": "x", "limit": 1e400}',
+            headers={"Content-Type": "application/json"},
+        )
+        assert resp.status_code == 400
+
     def test_numeric_string_limit_is_accepted(
         self, client: TestClient, mock_storage: AsyncMock
     ) -> None:
