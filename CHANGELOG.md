@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`/sync/ws` WebSocket always failed**: the router-level `require_local_request`
+  dependency was typed `Request`, which FastAPI cannot inject on a WebSocket route,
+  so every connection raised `TypeError ... missing 1 required positional argument:
+  'request'`. It is now typed `HTTPConnection`, so HTTP and WebSocket routes both work.
+
 ## [4.62.0] — 2026-08-16
 
 ### Breaking
