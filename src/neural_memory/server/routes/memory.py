@@ -879,7 +879,10 @@ async def create_synapse(
         created_at=request.created_at or utcnow(),
     )
 
-    synapse_id = await storage.add_synapse(synapse)
+    try:
+        synapse_id = await storage.add_synapse(synapse)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     return {
         "id": synapse_id,
