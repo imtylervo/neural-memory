@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Hub neuron warning in `nmem_health`**: `DiagnosticsEngine` now reports an
+  info-level `HUB_NEURONS` warning when a neuron has more than 20 synapses
+  (source or target; DREAM `_hub` synapses excluded) and recommends the top 5
+  by degree as possibly too generic. Purity score and component scores are
+  unchanged.
+
 ## [4.62.0] — 2026-08-16
 
 ### Breaking
