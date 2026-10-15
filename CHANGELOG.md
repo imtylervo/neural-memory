@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **SQLite write worker survives cancelled callers**: if a caller of
+  `SQLiteDialect.execute_write()` was cancelled (e.g. `asyncio.wait_for`
+  timeout) before the worker finished its statement, the worker raised
+  `InvalidStateError` on the already-cancelled future and died, so every later
+  write hung and `close()` re-raised the error.
+
 ## [4.62.0] — 2026-08-16
 
 ### Breaking

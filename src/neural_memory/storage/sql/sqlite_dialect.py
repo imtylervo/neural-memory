@@ -163,10 +163,12 @@ class SQLiteDialect(Dialect):
             try:
                 await self._conn.execute(sql, tuple(params))
                 await self._conn.commit()
-                if fut is not None:
+                if fut is not None and not fut.done():
                     fut.set_result(None)
             except Exception as e:
-                if fut is not None:
+                # Caller may have been cancelled; setting a result on a done
+                # future raises InvalidStateError and would kill the worker.
+                if fut is not None and not fut.done():
                     fut.set_exception(e)
                 logger.warning("Write worker error: %s", e)
             finally:
