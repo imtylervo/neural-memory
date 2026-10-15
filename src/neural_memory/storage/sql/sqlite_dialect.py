@@ -109,8 +109,8 @@ class SQLiteDialect(Dialect):
 
     async def close(self) -> None:
         # Stop write worker
-        if self._write_task is not None:
-            await self._write_queue.put((None, None, None))  # type: ignore[arg-type]
+        if self._write_task is not None and self._write_queue is not None:
+            await self._write_queue.put((None, None, None))
             await self._write_task
             self._write_task = None
             self._write_queue = None
@@ -156,7 +156,7 @@ class SQLiteDialect(Dialect):
             sql, params, fut = item
 
             # Sentinel to stop the worker
-            if sql is None:
+            if sql is None or params is None:
                 self._write_queue.task_done()
                 break
 
