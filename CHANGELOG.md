@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`nmem_remember` now persists the write-time quality score** as
+  `fiber.metadata["_quality_score"]`. Recall already read this key for
+  `confidence_score.content_quality` but nothing ever wrote it, so every
+  memory got the 5.0 default. Recall confidence now varies with memory
+  quality. Existing memories keep the 5.0 default (no backfill).
+
 ## [4.62.0] — 2026-08-16
 
 ### Breaking
