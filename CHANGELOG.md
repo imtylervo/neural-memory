@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Quality scorer for Vietnamese**: common Vietnamese causal (`vì`, `do đó`,
+  `dẫn đến`), temporal (`sau khi`, `trước khi`) and comparative (`thay vì`,
+  `so với`, `tốt hơn`) markers now count toward cognitive richness, and accented
+  filler (`cảm ơn`, `vâng`, `dạ`, `xong rồi`, `hiểu rồi`) is rejected by the
+  write gate like its unaccented forms.
+
 ## [4.62.0] — 2026-08-16
 
 ### Breaking

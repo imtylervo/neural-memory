@@ -156,3 +156,72 @@ class TestQualityResult:
         result = QualityResult(score=5, quality="medium")
         with pytest.raises(AttributeError):
             result.score = 10  # type: ignore[misc]
+
+
+class TestVietnameseMarkers:
+    """Vietnamese cognitive markers count like their English equivalents."""
+
+    @pytest.mark.parametrize(
+        ("with_marker", "without_marker"),
+        [
+            ("Lỗi xảy ra vì thiếu index trên bảng users", "Lỗi xảy ra thiếu index trên bảng users"),
+            (
+                "Lỗi xảy ra bởi vì thiếu index trên bảng users",
+                "Lỗi xảy ra thiếu index trên bảng users",
+            ),
+            (
+                "Thiếu index trên bảng users, vì vậy query chậm",
+                "Thiếu index trên bảng users, query chậm",
+            ),
+            (
+                "Thiếu index trên bảng users, do đó query chậm",
+                "Thiếu index trên bảng users, query chậm",
+            ),
+            (
+                "Thiếu index trên bảng users dẫn đến query chậm",
+                "Thiếu index trên bảng users query chậm",
+            ),
+            (
+                "Deploy sau khi chạy xong migration cho users",
+                "Deploy chạy xong migration cho users",
+            ),
+            ("Backup trước khi chạy migration cho users", "Backup chạy migration cho users"),
+            ("Cache warm up trong khi chạy migration users", "Cache warm up chạy migration users"),
+            (
+                "Chạy migration xong, sau đó warm cache users",
+                "Chạy migration xong, warm cache users",
+            ),
+            (
+                "Dùng Redis thay vì Memcached cho cache users",
+                "Dùng Redis Memcached cho cache users",
+            ),
+            (
+                "Redis ổn định so với Memcached cho cache users",
+                "Redis ổn định Memcached cho cache users",
+            ),
+            ("Redis tốt hơn Memcached cho cache của users", "Redis Memcached cho cache của users"),
+            (
+                "Redis nhanh hơn Memcached cho cache của users",
+                "Redis Memcached cho cache của users",
+            ),
+            ("Redis chậm hơn Memcached cho cache của users", "Redis Memcached cho cache của users"),
+        ],
+    )
+    def test_marker_adds_exactly_one_point(self, with_marker: str, without_marker: str) -> None:
+        assert score_memory(with_marker).score == score_memory(without_marker).score + 1
+
+    def test_example_sentence_has_no_reasoning_hint(self) -> None:
+        result = score_memory("Chọn PostgreSQL thay vì MySQL vì cần JSONB, sau khi benchmark 3 lần")
+        assert not any("Add reasoning" in h for h in result.hints)
+
+    def test_case_insensitive_on_accented_text(self) -> None:
+        upper = score_memory("VÌ thiếu index nên query trên bảng users chạy chậm")
+        base = score_memory("VÀ thiếu index nên query trên bảng users chạy chậm")
+        assert upper.score == base.score + 1
+
+    @pytest.mark.parametrize(
+        "content",
+        ["We do this daily for the users table", "Họ nên làm việc đó hằng ngày cho users"],
+    )
+    def test_ambiguous_words_not_markers(self, content: str) -> None:
+        assert any("Add reasoning" in h for h in score_memory(content).hints)

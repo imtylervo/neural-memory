@@ -19,19 +19,23 @@ if TYPE_CHECKING:
 
 _CAUSAL_PATTERN = re.compile(
     r"\b(because|caused|due to|led to|resulted in|reason|since|therefore"
-    r"|so that|in order to|as a result|consequently)\b",
+    r"|so that|in order to|as a result|consequently"
+    # Vietnamese; "vì" also covers "bởi vì" / "vì vậy", but not "thay vì" (comparative)
+    r"|(?<!thay )vì|do\s+đó|dẫn\s+đến)\b",
     re.IGNORECASE,
 )
 
 _TEMPORAL_PATTERN = re.compile(
     r"\b(after|before|then|when|while|during|until|once|first|next"
-    r"|previously|subsequently|earlier|later|following)\b",
+    r"|previously|subsequently|earlier|later|following"
+    r"|sau\s+khi|trước\s+khi|trong\s+khi|sau\s+đó)\b",
     re.IGNORECASE,
 )
 
 _COMPARATIVE_PATTERN = re.compile(
     r"\b(over|instead of|replaced|vs|versus|compared to|rather than"
-    r"|better than|worse than|faster|slower|cheaper|preferred)\b",
+    r"|better than|worse than|faster|slower|cheaper|preferred"
+    r"|thay\s+vì|so\s+với|tốt\s+hơn|nhanh\s+hơn|chậm\s+hơn)\b",
     re.IGNORECASE,
 )
 
@@ -73,6 +77,11 @@ _GENERIC_FILLER = frozenset(
         "hieu roi",
         "da",
         "vang",
+        "cảm ơn",
+        "hiểu rồi",
+        "xong rồi",
+        "dạ",
+        "vâng",
     }
 )
 
