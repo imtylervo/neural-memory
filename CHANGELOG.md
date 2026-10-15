@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `POST /memory/synapses` now returns 400 instead of an unhandled 500 when the source or target neuron does not exist or the synapse ID is already taken.
+
 ## [4.62.0] — 2026-08-16
 
 ### Breaking
