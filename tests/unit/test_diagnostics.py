@@ -20,6 +20,7 @@ from neural_memory.engine.diagnostics import (
     WarningSeverity,
     _score_to_grade,
 )
+from neural_memory.engine.encoder import MemoryEncoder
 from neural_memory.storage.memory_store import InMemoryStorage
 
 # ── Fixtures ─────────────────────────────────────────────────────
@@ -686,7 +687,12 @@ class TestRecommendations:
 
 
 async def _hub_store(
-    *, out_degree: int = 0, in_degree: int = 0, hub_meta: bool = False, hubs: int = 1
+    *,
+    out_degree: int = 0,
+    in_degree: int = 0,
+    hub_meta: bool = False,
+    temporal_meta: bool = False,
+    hubs: int = 1,
 ) -> InMemoryStorage:
     """Brain where neurons 'hub-0..' each have out_degree + in_degree synapses."""
     store = InMemoryStorage()
@@ -714,7 +720,13 @@ async def _hub_store(
                     source_id=hub_id if outgoing else leaf_id,
                     target_id=leaf_id if outgoing else hub_id,
                     type=SynapseType.RELATED_TO,
-                    metadata={"_hub": True} if hub_meta else None,
+                    metadata=(
+                        {"_hub": True}
+                        if hub_meta
+                        else {"temporal_link": True}
+                        if temporal_meta
+                        else None
+                    ),
                     synapse_id=f"s-{h}-{i}",
                 )
             )
@@ -774,6 +786,28 @@ class TestHubNeurons:
     @pytest.mark.asyncio
     async def test_dream_hub_synapses_not_counted(self) -> None:
         report = await _analyze(await _hub_store(out_degree=30, hub_meta=True))
+        assert _hub_warnings(report) == []
+
+    @pytest.mark.asyncio
+    async def test_temporal_link_synapses_not_counted(self) -> None:
+        report = await _analyze(await _hub_store(out_degree=30, temporal_meta=True))
+        assert _hub_warnings(report) == []
+
+    @pytest.mark.asyncio
+    async def test_encoder_built_brain_has_no_hub_warning(self) -> None:
+        store = InMemoryStorage()
+        brain = Brain.create(name="enc", config=BrainConfig(), owner_id="test")
+        await store.save_brain(brain)
+        store.set_brain(brain.id)
+        encoder = MemoryEncoder(store, brain.config)
+        start = datetime(2026, 1, 1, 8, 0)
+        for i in range(30):
+            await encoder.encode(
+                f"We fixed bug number {i} in the FastAPI service together",
+                timestamp=start + timedelta(hours=i // 3),
+                skip_conflicts=True,
+            )
+        report = await _analyze(store)
         assert _hub_warnings(report) == []
 
     @pytest.mark.asyncio

@@ -523,7 +523,8 @@ class DiagnosticsEngine:
         """Find neurons whose degree is above the hub threshold.
 
         Degree counts synapses where the neuron is source or target. DREAM hub
-        synapses (`_hub` metadata) are consolidation output and are skipped.
+        synapses (`_hub` metadata) and encoder temporal links (`temporal_link`
+        metadata) are structural output, not topic links, and are skipped.
 
         Returns:
             (top, total): up to 5 (label, degree) pairs, highest degree first,
@@ -531,7 +532,7 @@ class DiagnosticsEngine:
         """
         degree: Counter[str] = Counter()
         for s in all_synapses:
-            if s.metadata.get("_hub"):
+            if s.metadata.get("_hub") or s.metadata.get("temporal_link"):
                 continue
             degree[s.source_id] += 1
             degree[s.target_id] += 1
