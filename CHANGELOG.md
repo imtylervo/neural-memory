@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- API key middleware returned HTTP 500 instead of 403 when the provided key contained
+  non-ASCII characters (`hmac.compare_digest` raised `TypeError` on `str`).
+
 ## [4.62.0] — 2026-08-16
 
 ### Breaking

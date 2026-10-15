@@ -113,7 +113,7 @@ class APIKeyMiddleware(_Base):  # type: ignore[misc]
             )
 
         # Constant-time comparison to prevent timing attacks
-        if not hmac.compare_digest(configured_key, provided_key):
+        if not hmac.compare_digest(configured_key.encode(), provided_key.encode()):
             logger.warning(
                 "Invalid API key attempt from %s", request.client and request.client.host
             )
